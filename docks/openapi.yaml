@@ -1,0 +1,688 @@
+openapi: 3.0.3
+info:
+  title: Mimic App Management API
+  description: This API allows managing Mimic App.
+  version: 1.0.0
+servers:
+  - url: https://mimic-app.com/
+paths:
+  /ping:
+    get:
+      summary: Ping the server
+      description: Check if the server is running.
+      responses:
+        '200':
+          description: Server is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /login:
+    post:
+      summary: Login a user
+      description: Authenticate a user and generate a token.
+      requestBody:
+        description: User login credentials
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+      responses:
+        '200':
+          description: User authenticated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenAndUser'
+        '401':
+          description: Invalid credentials
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /signup:
+    post:
+      summary: User signup
+      description: Registers a new user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: Successful signup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenAndUser'
+        '400':
+          description: Invalid credentials
+        default:
+            description: General Error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+
+  /user/delete/:
+    delete:
+      summary: Delete user
+      description: Deletes a user by ID.
+      responses:
+        '200':
+          description: User deleted
+        '404':
+          description: User not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/update/:
+    get:
+      summary: Get user update information
+      description: Retrieves information for updating a user.
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+    put:
+      summary: Update user information
+      description: Updates a user's information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                username:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request
+        '404':
+          description: User not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/get_following_info:
+    get:
+      summary: Get following information
+      description: Retrieves a struct about following, follow request and mutual following.
+      responses:
+        '200':
+          description: Following information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowingInfo'
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/confirm_following_request/{id}:
+    get:
+      summary: Confirm following request
+      description: Confirms a following request by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Following request confirmed
+        '404':
+          description: Request not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/delete_following/{id}:
+    delete:
+      summary: Delete following request
+      description: Deletes a following request by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Following request deleted
+        '404':
+          description: Request not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/create_follow_request/{user_name}:
+    get:
+      summary: Create follow request
+      description: Creates a follow request for a specified user.
+      parameters:
+        - name: user_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Follow request created
+        '404':
+          description: User not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/create_original_like:
+    get:
+      summary: Get original like information
+      description: Retrieves information for creating an original like.
+      responses:
+        '200':
+          description: Original like information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginalLike'
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+    post:
+      summary: Create original like
+      description: Creates an original like.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Original like created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginalLikeURL'
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/delete_original_like/{url}:
+    delete:
+      summary: Delete original like
+      description: Deletes an original like by ID.
+      parameters:
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Original like deleted
+        '404':
+          description: Like not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/get_original/likes:
+    get:
+      summary: Get original likes
+      description: Retrieves all original likes.
+      responses:
+        '200':
+          description: Original likes retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginalLike'
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/post_picture/{mimikke_id}:
+    post:
+      summary: Post picture
+      description: Posts a picture for mimic and normal post.
+      parameters:
+        - name: mimikke_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Picture posted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OriginalLikeURL'
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/get_pictures:
+    get:
+      summary: Get pictures
+      description: Retrieves all pictures.
+      responses:
+        '200':
+          description: Pictures retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pictures'
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/get_following_pictures/:
+    get:
+      summary: Get following pictures
+      description: Retrieves all pictures of following users.
+      responses:
+        '200':
+          description: Pictures retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pictures'
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/add_comment/{picture_id}:
+    get:
+      summary: Add comment
+      description: Adds a comment to a picture.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Comment added
+        '404':
+          description: Picture not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/delete_comment/{comment_id}:
+    delete:
+      summary: Delete comment
+      description: Deletes a comment by ID.
+      parameters:
+        - name: comment_id
+          in: path
+          required: true
+          description: ID of the comment to delete
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Comment deleted
+        '404':
+          description: Comment not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+
+  /user/add_like:
+    post:
+      summary: Add like
+      description: Adds a like to a picture.
+      requestBody:
+        description: Like id and picture id
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddLike'
+      responses:
+        '200':
+          description: Like added
+        '404':
+          description: Picture not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+  /user/delete_like/{like_id}:
+    delete:
+      summary: Delete like
+      description: Deletes a like by ID.
+      parameters:
+        - name: like_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Like deleted
+        '404':
+          description: Like not found
+        default:
+          description: General Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        security:
+          - BearerAuth: [ ]
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Unique identifier for the user
+        username:
+            type: string
+            description: User name of the user
+        name:
+          type: string
+          description: Full name of the user
+        email:
+          type: string
+          description: Email address of the user
+
+    NewUser:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User name of the user
+        name:
+          type: string
+          description: name of the user
+        email:
+          type: string
+          description: Email address of the user
+        password:
+          type: string
+          description: Password of the user
+
+    LoginUser:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User name of the user
+        email:
+          type: string
+          description: Email address of the user
+        password:
+          type: string
+          description: Password of the user
+
+    Error:
+      description: Represents error object
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+    AuthTokenAndUser:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Authentication token
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            username:
+              type: string
+            name:
+              type: string
+            email:
+              type: string
+
+    FollowingInfo:
+      type: object
+      properties:
+        follow_request:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetFollowRequestsRow'
+        following:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetFollowingRow'
+        mutual_following:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetFollowingRow'
+
+    GetFollowRequestsRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    GetFollowingRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    OriginalLike:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int32
+          userID:
+            type: integer
+            format: int32
+          url:
+            type: string
+
+    OriginalLikeURL:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Unique identifier for the picture
+
+    Pictures:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int32
+          mimikke_id:
+            type: integer
+            format: int32
+          url:
+            type: string
+          time:
+            type: string
+            format: date-time
+          lat:
+            type: number
+          lon:
+            type: number
+
+    AddLike:
+      type: object
+      properties:
+        picture_id:
+          type: string
+          description: Unique identifier for the picture
+        like_id:
+          type: string
+          description: Unique identifier for the like
